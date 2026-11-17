@@ -1,98 +1,64 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function HomeScreen() {
+  const router = useRouter();
+  const [diaries, setDiaries] = useState([
+    { id: '1', title: 'Belajar React Native', content: 'Mempelajari komponen, props, state, dan routing.', mood: '😊 Senang', date: '10 Nov 2026' },
+    { id: '2', title: 'Mengerjakan UTS', content: 'Menyelesaikan tugas Mobile Programming dengan baik dan benar.', mood: '🚀 Bersemangat', date: '11 Nov 2026' },
+  ]);
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+    <View style={styles.container}>
+      <Text style={styles.headerTitle}>✨ Daily Diary App ✨</Text>
+      
+      <FlatList
+        data={diaries}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <TouchableOpacity 
+            style={styles.card} 
+            onPress={() => router.push({ pathname: '/detail', params: item })}
+          >
+            <View style={styles.headerCard}>
+              <Text style={styles.mood}>Mood: {item.mood}</Text>
+              <Text style={styles.date}>{item.date}</Text>
+            </View>
+            <Text style={styles.title} numberOfLines={1}>{item.title}</Text>
+            <Text style={styles.content} numberOfLines={2}>{item.content}</Text>
+          </TouchableOpacity>
+        )}
+      />
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+      <TouchableOpacity 
+        style={styles.addButton} 
+        onPress={() => router.push('/add-diary')}
+      >
+        <Text style={styles.addButtonText}>+ Tambah Catatan Baru</Text>
+      </TouchableOpacity>
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+      <TouchableOpacity 
+        style={styles.aboutButton} 
+        onPress={() => router.push('/about')}
+      >
+        <Text style={styles.aboutButtonText}>Tentang Aplikasi</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
+  container: { flex: 1, backgroundColor: '#fdf6f8', padding: 16 },
+  headerTitle: { fontSize: 22, fontWeight: 'bold', color: '#c75b7a', textAlign: 'center', marginVertical: 16 },
+  card: { backgroundColor: '#fff', padding: 16, borderRadius: 12, marginBottom: 12, borderWidth: 1, borderColor: '#f0d9df' },
+  headerCard: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
+  mood: { fontSize: 14, fontWeight: 'bold', color: '#d86b84' },
+  date: { fontSize: 12, color: '#888' },
+  title: { fontSize: 16, fontWeight: 'bold', color: '#333', marginBottom: 4 },
+  content: { fontSize: 14, color: '#666' },
+  addButton: { backgroundColor: '#d86b84', padding: 14, borderRadius: 10, alignItems: 'center', marginTop: 10 },
+  addButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  aboutButton: { backgroundColor: '#fff', padding: 12, borderRadius: 10, alignItems: 'center', borderWidth: 1, borderColor: '#d86b84', marginTop: 10 },
+  aboutButtonText: { color: '#d86b84', fontSize: 14, fontWeight: 'bold' },
 });
